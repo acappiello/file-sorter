@@ -1,0 +1,4 @@
+- Handle error messages appropriately.
+- CLI interface.
+- Option to combine month-day?
+- Hand off the actual execution to a separate process.
