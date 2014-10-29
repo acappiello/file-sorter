@@ -22,6 +22,7 @@ ATIME = 2
 class Sorter:
 
     def __init__(self):
+        """Use these default settings."""
         self.use_year = False
         self.use_month = False
         self.use_day = False
@@ -94,6 +95,8 @@ class Sorter:
         self.op_type = value
 
     def get_outdir(self, ts):
+        """Add the chosen pieces of the date/time."""
+
         out = ""
 
         if self.use_year:
@@ -120,11 +123,12 @@ class Sorter:
             raise Exception("Source path not valid: %s" % (src))
         elif (not os.path.exists(dest)):
             raise Exception("Destination path not valid: %s" % (dest))
-        if (dest.find(src) == 0):
-            raise Exception("Destination must not be inside Source path.")
 
         src = os.path.normpath(src)
         dest = os.path.normpath(dest)
+
+        if (dest.find(src) == 0):
+            raise Exception("Destination must not be inside Source path.")
 
         history = {}
 
@@ -150,7 +154,7 @@ class Sorter:
                     subfolder = root[len(src)+1:]
                     outdir = os.path.join(dest, subfolder, self.get_outdir(ts))
                 else:
-                    outdir = dest + os.sep + self.get_outdir(ts)
+                    outdir = os.path.join(dest, self.get_outdir(ts))
 
                 outfile = os.path.join(outdir, f)
 
@@ -163,6 +167,8 @@ class Sorter:
                         (name, ext) = name.rsplit('.', 1)
                         ext = '.' + ext
                     if outfile not in history:
+                        # Attempt to see if the file aleady ends in a number in
+                        # _### format.
                         if name.rfind('_') != -1:
                             (tname, tver) = name.rsplit('_', 1)
                             try:
@@ -174,8 +180,12 @@ class Sorter:
                             version = 1
                     else:
                         version = history[outfile]
+
+                    # Put the versioned filename back together.
                     fn = name + '_' + str(version) + ext
                     outfile = os.path.join(outdir, fn)
+
+                    # Unlikely, but just in case of bizarre conflicts.
                     while os.path.exists(outfile):
                         version += 1
                         fn = name + '_' + str(version) + ext
@@ -185,6 +195,7 @@ class Sorter:
 
                 print "in: %s, out: %s" % (fullpath, outfile)
 
+                # Actually copy/move the file.
                 if not os.path.exists(outdir):
                     util.create_directory(outdir)
                 if self.op_type == MOVE:
